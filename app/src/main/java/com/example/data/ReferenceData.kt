@@ -10,9 +10,26 @@ data class FormulaItem(
 
 data class LogicGateInfo(
     val name: String,
-    val expression: String,
+    val standardExpression: String,
+    val alternativeSymbols: String, // Light green symbols (e.g. "•  ^  &")
+    val logicTag: String,          // Light blue uppercase tag (e.g. "AND")
     val description: String,
     val truthTable: List<Pair<String, String>> // "A, B" -> "Output"
+)
+
+data class LotoStepInfo(
+    val stepNumber: Int,
+    val shortTitle: String,
+    val detail: String,
+    val isVerificationStep: Boolean = false
+)
+
+data class LotoDrillScenario(
+    val id: String,
+    val title: String,
+    val equipmentName: String,
+    val description: String,
+    val correctOrderedSteps: List<String>
 )
 
 object ReferenceData {
@@ -86,8 +103,10 @@ object ReferenceData {
     val logicGates: List<LogicGateInfo> = listOf(
         LogicGateInfo(
             name = "AND Gate",
-            expression = "Y = A · B",
-            description = "Output is HIGH (1) only when BOTH inputs are HIGH (1).",
+            standardExpression = "Y = A • B",
+            alternativeSymbols = "•  ^  &",
+            logicTag = "AND",
+            description = "Output is HIGH (1) only when ALL inputs are HIGH (1).",
             truthTable = listOf(
                 "0, 0" to "0",
                 "0, 1" to "0",
@@ -97,8 +116,10 @@ object ReferenceData {
         ),
         LogicGateInfo(
             name = "OR Gate",
-            expression = "Y = A + B",
-            description = "Output is HIGH (1) if EITHER input is HIGH (1).",
+            standardExpression = "Y = A + B",
+            alternativeSymbols = "+  v  ||",
+            logicTag = "OR",
+            description = "Output is HIGH (1) if ANY input is HIGH (1).",
             truthTable = listOf(
                 "0, 0" to "0",
                 "0, 1" to "1",
@@ -107,9 +128,22 @@ object ReferenceData {
             )
         ),
         LogicGateInfo(
+            name = "NOT Gate (Inverter)",
+            standardExpression = "Y = A̅",
+            alternativeSymbols = "¬  !  ~",
+            logicTag = "NOT",
+            description = "Inverts the input signal: HIGH becomes LOW, and LOW becomes HIGH.",
+            truthTable = listOf(
+                "0" to "1",
+                "1" to "0"
+            )
+        ),
+        LogicGateInfo(
             name = "NAND Gate",
-            expression = "Y = NOT(A · B)",
-            description = "Universal gate. Output is LOW (0) only when BOTH inputs are HIGH (1).",
+            standardExpression = "Y = NOT(A • B)",
+            alternativeSymbols = "¬(•)  !(^)  !(&)",
+            logicTag = "NAND",
+            description = "Universal gate. Output is LOW (0) ONLY when ALL inputs are HIGH (1).",
             truthTable = listOf(
                 "0, 0" to "1",
                 "0, 1" to "1",
@@ -119,8 +153,10 @@ object ReferenceData {
         ),
         LogicGateInfo(
             name = "NOR Gate",
-            expression = "Y = NOT(A + B)",
-            description = "Universal gate. Output is HIGH (1) only when BOTH inputs are LOW (0).",
+            standardExpression = "Y = NOT(A + B)",
+            alternativeSymbols = "¬(+)  !(v)  !(||)",
+            logicTag = "NOR",
+            description = "Universal gate. Output is HIGH (1) ONLY when ALL inputs are LOW (0).",
             truthTable = listOf(
                 "0, 0" to "1",
                 "0, 1" to "0",
@@ -130,24 +166,137 @@ object ReferenceData {
         ),
         LogicGateInfo(
             name = "XOR Gate (Exclusive OR)",
-            expression = "Y = A ⊕ B",
-            description = "Output is HIGH (1) when inputs are DIFFERENT from each other.",
+            standardExpression = "Y = A ⊕ B",
+            alternativeSymbols = "⊕  ≠  !=",
+            logicTag = "NOT EQUAL",
+            description = "Output is HIGH (1) when inputs are DIFFERENT (odd parity).",
             truthTable = listOf(
                 "0, 0" to "0",
                 "0, 1" to "1",
                 "1, 0" to "1",
                 "1, 1" to "0"
             )
+        ),
+        LogicGateInfo(
+            name = "XNOR Gate (Equivalence)",
+            standardExpression = "Y = NOT(A ⊕ B)",
+            alternativeSymbols = "⊙  =  ==",
+            logicTag = "EQUAL",
+            description = "Output is HIGH (1) when inputs are IDENTICAL (both 0 or both 1).",
+            truthTable = listOf(
+                "0, 0" to "1",
+                "0, 1" to "0",
+                "1, 0" to "0",
+                "1, 1" to "1"
+            )
         )
     )
 
-    val lotoSteps: List<Pair<String, String>> = listOf(
-        "1. Preparation" to "Identify all energy sources (electrical, pneumatic, hydraulic, kinetic, gravity, thermal).",
-        "2. Notification" to "Notify affected postal operators and supervisors that equipment will be shut down and locked out.",
-        "3. Equipment Shutdown" to "Stop machine via standard operating stop buttons/procedures.",
-        "4. Isolation" to "Operate main disconnect switches, circuit breakers, and pneumatic isolation ball valves.",
-        "5. Lockout & Tagout" to "Apply standardized postal safety padlock and danger tag to energy-isolating devices.",
-        "6. Stored Energy Dissipation" to "Bleed air lines, discharge hydraulic accumulators, lower counterweights, verify capacitors discharged.",
-        "7. Verification (Live-Dead-Live)" to "Attempt machine restart; perform 3-point live-dead-live meter test on all phases to verify ZERO electrical potential."
+    val lotoSteps: List<LotoStepInfo> = listOf(
+        LotoStepInfo(
+            stepNumber = 1,
+            shortTitle = "1. Identification",
+            detail = "Survey and identify all energy sources (electrical, pneumatic, hydraulic, kinetic, gravity, thermal).",
+            isVerificationStep = false
+        ),
+        LotoStepInfo(
+            stepNumber = 2,
+            shortTitle = "2. Notification",
+            detail = "Notify affected postal operators, tour supervisors, and maintenance technicians that equipment will be locked out.",
+            isVerificationStep = false
+        ),
+        LotoStepInfo(
+            stepNumber = 3,
+            shortTitle = "3. Normal Shutdown",
+            detail = "Stop the machine using standard operating stop buttons and sequence procedures.",
+            isVerificationStep = false
+        ),
+        LotoStepInfo(
+            stepNumber = 4,
+            shortTitle = "4. Energy Isolation",
+            detail = "Open all primary electrical disconnect switches, main circuit breakers, and pneumatic supply ball valves.",
+            isVerificationStep = false
+        ),
+        LotoStepInfo(
+            stepNumber = 5,
+            shortTitle = "5. Lockout & Tagout",
+            detail = "Apply standardized postal safety padlocks and danger tags with technician identification to every isolating device.",
+            isVerificationStep = false
+        ),
+        LotoStepInfo(
+            stepNumber = 6,
+            shortTitle = "6. Stored Energy Release",
+            detail = "Bleed air lines, discharge hydraulic accumulators, lower counterweights, block gravity loads, and discharge capacitors.",
+            isVerificationStep = false
+        ),
+        LotoStepInfo(
+            stepNumber = 7,
+            shortTitle = "7. Zero-Energy Verification",
+            detail = "CRITICAL: Attempt local restart to verify isolation, then perform a 3-point Live-Dead-Live meter test on all phases to prove ZERO voltage.",
+            isVerificationStep = true
+        )
+    )
+
+    val lotoDrillScenarios: List<LotoDrillScenario> = listOf(
+        LotoDrillScenario(
+            id = "drill_dbcs_sorter",
+            title = "DBCS Sorter Drive & Belt Lockout",
+            equipmentName = "Delivery Bar Code Sorter (DBCS)",
+            description = "A maintenance technician must service the main transport belt drive and replace a pinch roller assembly.",
+            correctOrderedSteps = listOf(
+                "1. Identify 480V 3-phase feed and 90 psi pneumatic line",
+                "2. Notify tour supervisor and mail processing operator",
+                "3. Press standard machine stop button on DBCS console",
+                "4. Throw main 480V disconnect handle to OFF and shut pneumatic valve",
+                "5. Apply postal padlock and signed Danger Tag to disconnect and valve",
+                "6. Open air drain valve to bleed residual 90 psi manifold pressure",
+                "7. Attempt console start, then verify ZERO voltage using Live-Dead-Live meter test"
+            )
+        ),
+        LotoDrillScenario(
+            id = "drill_chiller_pump",
+            title = "HVAC Chilled Water Pump Lockout (BEM)",
+            equipmentName = "Plant Chiller & Secondary Pump #2",
+            description = "BEM technician must rebuild mechanical seals on a 480V, 25 HP chilled water circulation pump.",
+            correctOrderedSteps = listOf(
+                "1. Review mechanical & electrical schematics for pump #2 and motor control center",
+                "2. Notify building facilities supervisor and control room engineer",
+                "3. Stop pump via building automation console and hand-off-auto switch",
+                "4. Open MCC feeder disconnect and close suction/discharge water valves",
+                "5. Install lockout hasp, postal lock, and danger tag on MCC breaker handle",
+                "6. Depressurize pump casing bleed valve and verify expansion tank isolated",
+                "7. Test MCC load side terminals with calibrated multimeter using Live-Dead-Live method"
+            )
+        ),
+        LotoDrillScenario(
+            id = "drill_afcs_cabinet",
+            title = "AFCS Automation Cabinet 480V Feeder Lockout",
+            equipmentName = "Advanced Facer Canceler System (AFCS)",
+            description = "Electronic technician (ET) needs to replace a fused power distribution terminal block inside the primary power bay.",
+            correctOrderedSteps = listOf(
+                "1. Identify main feeder panel breaker and 120V control transformer circuit",
+                "2. Notify automation maintenance supervisor and canceler operations crew",
+                "3. Perform controlled shutdown of AFCS controller and sub-systems",
+                "4. Turn wall-mounted disconnect switch to the OFF position",
+                "5. Attach personal postal safety lock and completed Danger Tag to handle hasp",
+                "6. Discharge internal DC bus filter capacitors through high-wattage bleed resistor",
+                "7. Perform 3-point Live-Dead-Live test across all three line and load phases"
+            )
+        ),
+        LotoDrillScenario(
+            id = "drill_bulk_pusher",
+            title = "Parcel Sorter Pneumatic Pusher Arm Lockout",
+            equipmentName = "Bulk Parcel Sorter Ejector #4",
+            description = "Mechanic must replace the rod-end clevis and guide bearings on a pneumatic pusher cylinder.",
+            correctOrderedSteps = listOf(
+                "1. Identify compressed air supply header and 24V DC solenoid valve circuit",
+                "2. Inform parcel sorter induction crew and lead mechanic",
+                "3. Stop parcel conveyor and disable automated ejector sequence",
+                "4. Close pneumatic lockout ball valve feeding ejector bank #4",
+                "5. Fasten safety padlock and tag through lockout ball valve handle hole",
+                "6. Cycle exhaust valve and physically pin/block cylinder pusher arm from moving",
+                "7. Verify pressure gauge reads 0 psi and press manual test solenoid to verify dead line"
+            )
+        )
     )
 }

@@ -3,6 +3,8 @@ package com.example.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.common.learning.LearningEngine
+import com.example.common.learning.MasteryLevel
 import com.example.data.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,6 +16,7 @@ sealed class Screen {
     data class Practice(val category: Category? = null) : Screen()
     data object ExamActive : Screen()
     data class ExamResultScreen(val result: ExamAttempt) : Screen()
+    data object Flashcards : Screen()
     data object SpatialLab : Screen()
     data object Troubleshooting : Screen()
     data object Reference : Screen()
@@ -22,6 +25,7 @@ sealed class Screen {
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = UserProgressRepository(application.applicationContext)
+    val learningEngine = LearningEngine(application.applicationContext)
 
     // Navigation state
     private val _currentScreen = MutableStateFlow<Screen>(Screen.Home)
@@ -164,6 +168,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (currentQ != null) {
                 val isCorrect = index == currentQ.correctIndex
                 repository.recordAnswer(currentQ.id, isCorrect)
+                learningEngine.recordQuestionOutcome(currentQ.id, isCorrect)
             }
         }
     }
@@ -219,6 +224,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val current = _examAnswers.value.toMutableMap()
         current[questionId] = optionIndex
         _examAnswers.value = current
+
+        val q = _examQuestions.value.firstOrNull { it.id == questionId }
+        if (q != null) {
+            val isCorrect = optionIndex == q.correctIndex
+            // Record outcome immediately so weakness tracker and flashcards know where user is failing
+            learningEngine.recordQuestionOutcome(questionId, isCorrect)
+            repository.recordAnswer(questionId, isCorrect)
+        }
     }
 
     fun toggleExamFlag(questionId: Int) {
@@ -268,6 +281,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         repository.recordExamAttempt(attempt)
         _currentScreen.value = Screen.ExamResultScreen(attempt)
+    }
+
+    // Flashcards review recording
+    fun recordFlashcardReview(questionId: Int, rating: MasteryLevel) {
+        learningEngine.recordFlashcardReview(questionId, rating)
     }
 
     // Spatial Lab

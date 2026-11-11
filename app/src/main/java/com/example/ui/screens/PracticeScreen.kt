@@ -400,11 +400,10 @@ fun PracticeScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Button(
+                    OutlinedButton(
                         onClick = { viewModel.nextPracticeQuestion() },
                         enabled = currentIndex < questions.size - 1,
                         modifier = Modifier.testTag("practice_next_btn"),
-                        colors = ButtonDefaults.buttonColors(containerColor = PostalNavyPrimary),
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Text("Next")

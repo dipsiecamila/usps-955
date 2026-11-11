@@ -279,16 +279,16 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedButton(
-                        onClick = { viewModel.navigateTo(Screen.SpatialLab) },
+                        onClick = { viewModel.navigateTo(Screen.Flashcards) },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
-                            .testTag("home_spatial_lab_btn"),
+                            .testTag("home_flashcards_btn"),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Icon(Icons.Default.ViewInAr, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Style, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Spatial Lab", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                        Text("Flashcards", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                     }
 
                     OutlinedButton(

@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
                     is Screen.Practice -> "Domain Practice"
                     is Screen.ExamActive -> "USPS 955 Mock Exam"
                     is Screen.ExamResultScreen -> "Exam Results"
+                    is Screen.Flashcards -> "Study Flashcards"
                     is Screen.SpatialLab -> "Spatial Relations"
                     is Screen.Troubleshooting -> "Machine Diagnostics"
                     is Screen.Reference -> "Maintenance Handbook"
@@ -51,6 +52,7 @@ class MainActivity : ComponentActivity() {
                     is Screen.Practice -> (currentScreen as Screen.Practice).category?.title ?: "All Domains"
                     is Screen.ExamActive -> "Official 30-Question Simulation"
                     is Screen.ExamResultScreen -> "Postal Craft Scorecard"
+                    is Screen.Flashcards -> "Spaced Repetition & Acceptance Queue"
                     is Screen.SpatialLab -> "2D-to-3D Net Folding Trainer"
                     is Screen.Troubleshooting -> "Interactive Fault Isolation"
                     is Screen.Reference -> "Formulas, Logic & Shop Tables"
@@ -90,6 +92,7 @@ class MainActivity : ComponentActivity() {
                         is Screen.Practice -> PracticeScreen(viewModel = viewModel, modifier = screenModifier)
                         is Screen.ExamActive -> ExamScreen(viewModel = viewModel, modifier = screenModifier)
                         is Screen.ExamResultScreen -> ExamResultScreen(result = screen.result, viewModel = viewModel, modifier = screenModifier)
+                        is Screen.Flashcards -> FlashcardsScreen(viewModel = viewModel, modifier = screenModifier)
                         is Screen.SpatialLab -> SpatialLabScreen(viewModel = viewModel, modifier = screenModifier)
                         is Screen.Troubleshooting -> TroubleshootingScreen(viewModel = viewModel, modifier = screenModifier)
                         is Screen.Reference -> ReferenceScreen(viewModel = viewModel, modifier = screenModifier)

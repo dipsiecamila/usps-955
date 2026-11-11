@@ -276,10 +276,9 @@ fun SpatialLabScreen(
                         Text("Prev Drill")
                     }
 
-                    Button(
+                    OutlinedButton(
                         onClick = { viewModel.nextSpatialQuestion() },
                         enabled = currentIndex < spatialQuestions.size - 1,
-                        colors = ButtonDefaults.buttonColors(containerColor = PostalNavyPrimary),
                         modifier = Modifier.testTag("spatial_next_btn")
                     ) {
                         Text("Next Drill")

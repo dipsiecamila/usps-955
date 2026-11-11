@@ -104,7 +104,7 @@ fun USPSBottomNavBar(
         val isHome = currentScreen is Screen.Home
         val isPractice = currentScreen is Screen.Practice
         val isExam = currentScreen is Screen.ExamActive || currentScreen is Screen.ExamResultScreen
-        val isSpatial = currentScreen is Screen.SpatialLab
+        val isFlashcards = currentScreen is Screen.Flashcards
         val isTroubleshoot = currentScreen is Screen.Troubleshooting
         val isRef = currentScreen is Screen.Reference
 
@@ -130,11 +130,11 @@ fun USPSBottomNavBar(
             modifier = Modifier.testTag("nav_exam")
         )
         NavigationBarItem(
-            selected = isSpatial,
-            onClick = { onNavigate(Screen.SpatialLab) },
-            icon = { Icon(Icons.Default.ViewInAr, contentDescription = "Spatial") },
-            label = { Text("Spatial") },
-            modifier = Modifier.testTag("nav_spatial")
+            selected = isFlashcards,
+            onClick = { onNavigate(Screen.Flashcards) },
+            icon = { Icon(Icons.Default.Style, contentDescription = "Flashcards") },
+            label = { Text("Cards") },
+            modifier = Modifier.testTag("nav_flashcards")
         )
         NavigationBarItem(
             selected = isTroubleshoot,

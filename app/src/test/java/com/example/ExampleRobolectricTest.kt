@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.example.data.Category
 import com.example.data.CraftRole
 import com.example.data.QuestionBank
+import com.example.data.ReferenceData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -24,13 +25,13 @@ class ExampleRobolectricTest {
     }
 
     @Test
-    fun `question bank contains questions for all categories`() {
+    fun `question bank contains 120 questions across all categories`() {
         val questions = QuestionBank.allQuestions
-        assertTrue(questions.isNotEmpty())
+        assertEquals(120, questions.size)
 
         Category.entries.forEach { category ->
             val catQuestions = QuestionBank.getQuestionsByCategory(category)
-            assertTrue("Expected questions for category $category", catQuestions.isNotEmpty())
+            assertEquals("Expected 20 questions for category $category", 20, catQuestions.size)
         }
     }
 
@@ -40,5 +41,17 @@ class ExampleRobolectricTest {
             val craftQuestions = QuestionBank.getQuestionsForCraft(craft)
             assertTrue("Expected questions for craft $craft", craftQuestions.isNotEmpty())
         }
+    }
+
+    @Test
+    fun `reference data contains 4 loto drill scenarios and enriched logic gates`() {
+        val scenarios = ReferenceData.lotoDrillScenarios
+        assertEquals(4, scenarios.size)
+
+        val gates = ReferenceData.logicGates
+        assertTrue(gates.any { it.logicTag == "AND" && it.alternativeSymbols.contains("&") })
+        assertTrue(gates.any { it.logicTag == "OR" && it.alternativeSymbols.contains("||") })
+        assertTrue(gates.any { it.logicTag == "NOT" && it.alternativeSymbols.contains("!") })
+        assertTrue(gates.any { it.logicTag == "NOT EQUAL" && it.alternativeSymbols.contains("!=") })
     }
 }
