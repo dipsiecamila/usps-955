@@ -1,0 +1,6 @@
+{
+  "name": "USPS 955",
+  "description": "Comprehensive prep app for USPS Postal Maintenance Exam 955 covering Electronics, Mechanics, Fluid Power, Maintenance, Spatial Relations, and Troubleshooting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
